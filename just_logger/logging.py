@@ -1,8 +1,8 @@
 from datetime import datetime
-from .enums import LogLevel, LogFilter
-from .exceptions import LogError
-from .utils import add_file_and_line
-from . import settings
+from enums import LogLevel, LogFilter
+from exceptions import LogError
+from utils import add_file_and_line
+import settings
 
 
 class Log(object):
@@ -11,13 +11,13 @@ class Log(object):
     self.level: LogLevel = level
     self.timestamp: str = datetime.now().isoformat() 
     
-    if self.level.value in settings.log_filter:
+    if self.level in settings.log_filter.value:
       print(self) 
   
   def __str__(self, is_file: bool = False) -> str:
     if is_file:
       return f"| {self.timestamp} - {self.level.value}: {self.message} |".ljust(150)
-    return f"{settings._log_colors[self.level]}| {self.timestamp} - {self.level.value}: {self.message} ".ljust(150) + "|\033[0m"
+    return f"{settings.log_colors[self.level.value]}| {self.timestamp} - {self.level.value}: {self.message} ".ljust(150) + "|\033[0m"
   
 class Logger(object):
   def __init__(self, log_file: str = None) -> None:
@@ -55,7 +55,7 @@ class Logger(object):
   def critical(self, message: str) -> Log:
     self._create_log(Log(add_file_and_line(message), LogLevel.CRITICAL))
   
-  def print_log_stack(self, log_filter: LogFilter = LogFilter.ALL) -> None:
+  def print_log_stack(self, log_filter: LogFilter = LogFilter.DEBUG) -> None:
     for log in self.filter_log(filter = log_filter.value):
       print(log)
       
