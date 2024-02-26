@@ -11,13 +11,5 @@ class LogFilter(Enum):
   ONLY_WARNING = [LogLevel.WARNING]
   ONLY_ERROR = [LogLevel.ERROR]
   ONLY_CRITICAL = [LogLevel.CRITICAL]
-  ALL = [LogLevel.INFO, LogLevel.WARNING, LogLevel.ERROR, LogLevel.CRITICAL]
-  LTE_ERROR = [LogLevel.INFO, LogLevel.WARNING, LogLevel.ERROR]
-  LTE_WARNING = [LogLevel.INFO, LogLevel.WARNING]
-
-class LogColor(Enum):
-  INFO = "\033[94m"
-  WARNING = "\033[93m"
-  ERROR = "\033[91m"
-  CRITICAL = "\033[41m"
-  RESET = "\033[0m"
+  DEBUG = [LogLevel.INFO, LogLevel.WARNING, LogLevel.ERROR, LogLevel.CRITICAL]
+  PROD = [LogLevel.WARNING, LogLevel.ERROR]
