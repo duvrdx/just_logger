@@ -1,41 +1,42 @@
-name: Publish Python 🐍 distributions 📦 to PyPI
+name: Publish to PyPI
 
 on:
   push:
-    tags:
-      - '*'
+    branches: [ main ]
 
 jobs:
-  build-n-publish:
-    name: Build and publish Python 🐍 distributions 📦 to PyPI
+  publish:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install twine bump2version wheel
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip wheel setuptools
-        python -m pip install --upgrade build
+      - name: Update version (if message doesn't contain [new-version])
+        run: |
+          if [[ ! $GITHUB_EVENT_MESSAGE =~ /^\[new-version\] / ]]; then
+            bump2version --tag patch --message '[new-version] {new_version}'
+          fi
 
-    - name: Extract tag name
-      id: tag
-      run: echo ::set-output name=TAG_NAME::$(echo $GITHUB_REF | cut -d / -f 3)
+      - name: Build the package
+        run: |
+          rm -rf build dist
+          python setup.py sdist bdist_wheel
 
-    - name: Update version in pyproject.toml
-      run: sed -i "s/^version = .*/version = '${{ steps.tag.outputs.TAG_NAME }}'/" pyproject.toml
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi@v2
+        with:
+          username: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
+          repository: pypi
 
-    - name: Build a binary wheel
-      run: python -m build
+      - name: Push changes (optional)
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add -f dist/*
+          git commit -m "Publish to PyPI [CI skip]"
+          git push origin ${{ github.sha }}
 
-    - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
-        package: dist/*
