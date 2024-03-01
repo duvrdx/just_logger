@@ -1,4 +1,6 @@
- # Just Logger 
+
+
+# Just Logger 
 __________________________________________
 
 This is a library featuring a simple logger for Python 3.
